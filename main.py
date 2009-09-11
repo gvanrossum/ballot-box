@@ -177,7 +177,9 @@ class GenerateHandler(webapp.RequestHandler):
     if n > 500:
       n = 500
     private_keys = models.generate_keys(self.election, n)
-    self.response.out.write(render('keys', keys=private_keys,
+    self.response.out.write(render('keys',
+                                   n=n,
+                                   keys=private_keys,
                                    election=self.election,
                                    host_url=self.request.host_url))
 
