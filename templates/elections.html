@@ -3,24 +3,50 @@
 <p>Your email: {{user.email}}
 
 {% if elections %}
-<form method="POST" action="/delete">
 <table border=1>
-<thead>
-<tr><td></td><th>Title</th><th>Info</th><th>State</th></tr>
-</thead>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Subtitle</th>
+      <th>Info</th>
+    </tr>
+  </thead>
 {% for el in elections %}
 <tr>
-  <td><input type="checkbox" name="delete" value="{{el.key.id}}"></td>
   <td>{{el.title}}</td>
+  <td>{{el.subtitle}}</td>
   <td>{{el.info}}</td>
-  <td>{{el.state}}</td>
   <td><a href="/generate?id={{el.key.id}}">Generate Keys</a></td>
   <td><a href="/ballots?id={{el.key.id}}">Show Ballots</a></td>
+  <td>
+    <form method="POST" action="/change">
+      <input type="hidden" name="id" value="{{el.key.id}}">
+      <select name="state">
+	<option value="SETUP"
+		{% ifequal el.state "SETUP" %}selected{% endifequal %}>
+	  Setup</option>
+	<option value="PREVIEW"
+		{% ifequal el.state "PREVIEW" %}selected{% endifequal %}>
+	  Preview</option>
+	<option value="OPEN"
+		{% ifequal el.state "OPEN" %}selected{% endifequal %}>
+	  Voting</option>
+	<option value="CLOSED"
+		{% ifequal el.state "CLOSED" %}selected{% endifequal %}>
+	  Closed</option>
+      </select>
+      <input type="submit" value="Set">
+    </form>
+  </td>
+  <td>
+    <form method="POST" action="/delete">
+    <input type="hidden" name="id" value="{{el.key.id}}">
+    <input type="submit" value="Delete">
+    </form>
+  </td>
 </tr>
 {% endfor %}
 </table>
-<input type="submit" value="Delete Selected">
-</form>
 {% else %}
 <p>You have no elections</p>
 {% endif %}

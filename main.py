@@ -52,9 +52,9 @@ def require_anonymous(func):
   return require_anonymous_wrapper
 
 
-def require_election(func):
+def require_election_owner(func):
   @require_login
-  def require_election_wrapper(self):
+  def require_election_owner_wrapper(self):
     id = self.request.get("id")
     if not id:
       self.redirect('/')
@@ -76,8 +76,36 @@ def require_election(func):
       return
     self.election = el
     func(self)
-  return require_election_wrapper
+  return require_election_owner_wrapper
 
+
+def require_closed_election(func):
+  def require_closed_election_wrapper(self):
+    id = self.request.get("id")
+    if not id:
+      self.redirect('/')
+      return
+    try:
+      id = int(id)
+    except Exception:
+      self.response.set_status(404)
+      self.response.out.write('Invalid id (%r)' % id)
+      return
+    el = models.Election.get_by_id(id)
+    if el is None:
+      self.response.set_status(404)
+      self.response.out.write('No such election (%r)' % id)
+      return
+    if el.state != models.Election.CLOSED:
+      self.response.set_status(403)
+      if el.state == models.Election.OPEN:
+        self.response.out.write('This election is still open (%r)' % id)
+      else:
+        self.response.out.write('This election has not yet begun (%r)' % id)
+      return
+    self.election = el
+    func(self)
+  return require_closed_election_wrapper
 
 
 def render(name, **kwds):
@@ -87,7 +115,7 @@ def render(name, **kwds):
 class RootHandler(webapp.RequestHandler):
 
   def get(self):
-    self.response.out.write(render('index'))
+    self.redirect('/elections')
 
 
 class ElectionsHandler(webapp.RequestHandler):
@@ -96,7 +124,7 @@ class ElectionsHandler(webapp.RequestHandler):
   @require_login
   def get(self):
     """Show the list of elections for this user."""
-    elections = models.Election.gql('WHERE owner = :1', self.user).fetch(101)
+    elections = models.Election.gql('WHERE owner = :1', self.user).fetch(1000)
     self.response.out.write(render('elections',
                                    elections=elections,
                                    user=self.user))
@@ -113,8 +141,9 @@ class CreateHandler(webapp.RequestHandler):
   def post(self):
     """Create a new election."""
     title = self.request.get('title')
+    subtitle = self.request.get('subtitle')
     info = self.request.get('info')
-    el = models.Election(title=title, info=info)
+    el = models.Election(title=title, subtitle=subtitle, info=info)
     el.put()
     self.redirect('/elections')
 
@@ -122,32 +151,21 @@ class CreateHandler(webapp.RequestHandler):
 class DeleteHandler(webapp.RequestHandler):
   """Delete elections selected in the list of elections."""
 
-  @require_login
+  @require_election_owner
   def post(self):
-    """Delete one or more elections."""
-    ids = self.request.get_all('delete')
-    try:
-      ids = map(int, ids)
-    except Exception:
-      self.response.set_status(404)
-      self.response.out.write('404 Ids must be ints')
-      return
-    logging.info('delete Elections with ids %s', ids)
-    elections = models.Election.get_by_id(ids)
-    to_delete = [el.key() for el in elections
-                          if el is not None and el.owner == self.user]
-    db.delete(to_delete)
+    """Delete an election."""
+    self.election.delete()
     self.redirect('/elections')
 
 
 class GenerateHandler(webapp.RequestHandler):
   """Generate a block of keys for an election."""
 
-  @require_election
+  @require_election_owner
   def get(self):
     self.response.out.write(render('generate', election=self.election))
 
-  @require_election
+  @require_election_owner
   def post(self):
     n = self.request.get("n")
     try:
@@ -162,6 +180,22 @@ class GenerateHandler(webapp.RequestHandler):
     self.response.out.write(render('keys', keys=private_keys,
                                    election=self.election,
                                    host_url=self.request.host_url))
+
+
+class ChangeHandler(webapp.RequestHandler):
+  """Change election state."""
+
+  @require_election_owner
+  def post(self):
+    logging.info('change state')
+    state = self.request.get("state")
+    if state not in models.Election.state.choices:
+      self.response.set_status(404)
+      self.response.out.wrote('Invalid state (%r)' % state)
+      return
+    self.election.state = state
+    self.election.put()
+    self.redirect('/elections')
 
 
 class VoteHandler(webapp.RequestHandler):
@@ -183,7 +217,8 @@ class VoteHandler(webapp.RequestHandler):
       self.response.set_status(404)
       self.response.out.write('Invalid voter key a (%r)' % key_a)
       return
-    self.response.out.write(render('vote', voter=voter))
+    self.response.out.write(render('vote', voter=voter,
+                                   host_url=self.request.host_url))
 
   @require_anonymous
   def post(self):
@@ -208,7 +243,7 @@ class BallotsHandler(webapp.RequestHandler):
 
   # TODO: Allow anyone with a valid key_a or key_b to view this.
 
-  @require_election
+  @require_closed_election
   def get(self):
     query = models.Voter.gql("WHERE election = :1 AND voted = true "
                              "ORDER BY key_b", self.election)
@@ -229,6 +264,7 @@ URLS = [
   ('/create', CreateHandler),
   ('/delete', DeleteHandler),
   ('/generate', GenerateHandler),
+  ('/change', ChangeHandler),
   ('/vote', VoteHandler),
   ('/ballots', BallotsHandler),
   ('.*', ErrorHandler),

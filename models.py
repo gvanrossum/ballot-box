@@ -7,14 +7,16 @@ from google.appengine.ext import db
 
 class Election(db.Model):
   # Election states
-  SETUP = 0
-  PREVIEW = 1
-  OPEN = 2
-  CLOSED = 3
+  SETUP = 'SETUP'  # Only election officials have access
+  PREVIEW = 'PREVIEW'  # Members can view but not vote
+  OPEN = 'OPEN'  # Members can vote
+  CLOSED = 'CLOSED'  # Voting closed; ballots can be seen
   title = db.StringProperty()
+  subtitle = db.StringProperty()
   info = db.TextProperty()
   form = db.TextProperty()
-  state = db.IntegerProperty(default=SETUP)
+  state = db.StringProperty(default=SETUP,
+                            choices=[SETUP, PREVIEW, OPEN, CLOSED])
   owner = db.UserProperty(auto_current_user_add=True)
   created = db.DateTimeProperty(auto_now_add=True)
   modified = db.DateTimeProperty(auto_now_add=True)
