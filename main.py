@@ -175,6 +175,7 @@ class DeleteTaskHandler(webapp.RequestHandler):
         self.response.set_status(401)
       else:
         self.response.set_status(403)
+      logging.error('delete_task not invoked from task manager')
       self.response.out.write('Should be invoked by the task manager only')
       return
     key = self.request.get('key')
@@ -218,7 +219,6 @@ class ChangeHandler(webapp.RequestHandler):
 
   @require_election_owner
   def post(self):
-    logging.info('change state')
     state = self.request.get("state")
     if state not in models.Election.state.choices:
       self.response.set_status(404)

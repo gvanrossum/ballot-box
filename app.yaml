@@ -5,6 +5,9 @@ api_version: 1
 
 handlers:
 
+- url: /delete_task
+  script: main.py
+
 - url: /.*
   script: main.py
   secure: always
