@@ -2,9 +2,9 @@
 
 Operations for admins:
 - create an election
-- update ballot form
+- update ballot form (TODO)
 - get batch of private keys
-- invalidate a private key
+- invalidate a private key (TODO)
 - begin election
 - close election
 
@@ -20,14 +20,20 @@ Operations for observers:
 """
 
 import logging
+import os
 
 from google.appengine.api import users
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import util
 
 import models
+
+
+def is_dev():
+  return os.getenv('SERVER_SOFTWARE', '').startswith('Dev')
 
 
 def require_login(func):
@@ -154,8 +160,31 @@ class DeleteHandler(webapp.RequestHandler):
   @require_election_owner
   def post(self):
     """Delete an election."""
+    key = self.election.key()
     self.election.delete()
+    taskqueue.add(url='/delete_task', params={'key': str(key)})
     self.redirect('/elections')
+
+
+class DeleteTaskHandler(webapp.RequestHandler):
+  """Background deletion of voter records for a deleted election."""
+
+  def post(self):
+    if not users.is_current_user_admin() and not is_dev():
+      if users.get_current_user() is None:
+        self.response.set_status(401)
+      else:
+        self.response.set_status(403)
+      self.response.out.write('Should be invoked by the task manager only')
+      return
+    key = self.request.get('key')
+    while True:
+      votes = db.GqlQuery('SELECT __key__ FROM Voter '
+                          'WHERE election = KEY(:1) LIMIT 100', key).fetch(100)
+      logging.info('deleting %d votes', len(votes))
+      if not votes:
+        break
+      db.delete(votes)
 
 
 class GenerateHandler(webapp.RequestHandler):
@@ -265,6 +294,7 @@ URLS = [
   ('/elections', ElectionsHandler),
   ('/create', CreateHandler),
   ('/delete', DeleteHandler),
+  ('/delete_task', DeleteTaskHandler),
   ('/generate', GenerateHandler),
   ('/change', ChangeHandler),
   ('/vote', VoteHandler),
