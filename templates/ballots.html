@@ -1,0 +1,13 @@
+<h1>Ballots</h1>
+
+<h3>{{election.title}}</h3>
+
+<p>{{election.info}}</p>
+
+<table>
+<thead>
+<tr><th>Key B</th><th>Ballot</th></tr>
+</thead>
+{% for voter in query %}
+<tr><td>{{voter.key_b}}</td><td>{{voter.ballot}}</td></tr>{% endfor %}
+</table>

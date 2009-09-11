@@ -1,0 +1,11 @@
+<h1>Generated Keys</h1>
+
+<h3>{{election.title}}</h3>
+
+<p>{{election.info}}</p>
+
+<p>Please cut and past and save in a secure file.  Mail each voter a
+diferent key and keep the mapping between emails and keys secret.</p>
+
+{% for key in keys %}
+<div><a href="{{host_url}}/vote?a={{key}}">{{host_url}}/vote?a={{key}}</a></div>{% endfor %}

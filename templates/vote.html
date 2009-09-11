@@ -1,0 +1,18 @@
+<h1>Voter Ballot</h1>
+
+<h3>{{voter.election.title}}</h3>
+
+<p>{{voter.election.info}}</p>
+
+{% if voter.voted %}
+<p>You have voted.  You can always change your vote.
+{% else %}
+<p>You have not voted yet.  Please enter your ballot in the form below.
+{% endif %}
+
+<p>Your key B is {{voter.key_b}}
+
+<form method="POST" action="/vote">
+<input type="hidden" name="b" value="{{voter.key_b}}">
+<textarea cols=60 rows=12 name="ballot">{% firstof voter.ballot '' %}</textarea>
+<input type="submit" value="Vote">

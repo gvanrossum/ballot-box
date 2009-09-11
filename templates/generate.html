@@ -1,0 +1,13 @@
+<h1>Generate Keys</h1>
+{% if election %}
+<h3>{{election.title}}</h3>
+<p>{{election.info}}</p>
+<form method="POST" action="/generate">
+<input type="hidden" name="id" value="{{election.key.id}}">
+<input type="number" name="n" value="10">
+<input type="submit" value="Generate">
+</form>
+{% else %}
+<p>You should select an Election first from the
+<a href="/elections">List</a> of your elections.</p>
+{% endif %}

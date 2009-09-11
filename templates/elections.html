@@ -1,0 +1,27 @@
+<h1>Your Elections</h1>
+
+<p>Your email: {{user.email}}
+
+{% if elections %}
+<form method="POST" action="/delete">
+<table border=1>
+<thead>
+<tr><td></td><th>Title</th><th>Info</th><th>State</th></tr>
+</thead>
+{% for el in elections %}
+<tr>
+  <td><input type="checkbox" name="delete" value="{{el.key.id}}"></td>
+  <td>{{el.title}}</td>
+  <td>{{el.info}}</td>
+  <td>{{el.state}}</td>
+  <td><a href="/generate?id={{el.key.id}}">Generate Keys</a></td>
+  <td><a href="/ballots?id={{el.key.id}}">Show Ballots</a></td>
+</tr>
+{% endfor %}
+</table>
+<input type="submit" value="Delete Selected">
+</form>
+{% else %}
+<p>You have no elections</p>
+{% endif %}
+<p><a href="/create">Create an Election</a>
