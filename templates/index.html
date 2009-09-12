@@ -1,7 +1,47 @@
-<H1>Election Management</h1>
+<h1 style="margin-bottom: 0">Welcome to Ballot-Box</h1>
+<div style="margin-left: 2em"><i>Your election manager on the web</i></div>
+
+<p>Using Ballot-Box you can easily and securely organize an election
+for your membership organization.  Using our secure server setup,
+anonymity of ballots is guaranteed.
+
+<p>Here's how it works: after logging in, you create an election for
+your organization.  You can specify an election title, a subtitle, and
+an additional paragraph of text explaining the purpose for your
+election.  You then change the state of your election to 'Preview' and
+download our handy open source mail merge script that sends each
+member of your organization a unique anonimized election key.  The key
+is just a random number, it contains no encrypted information about
+the member.
+
+<p>Once election day come around, you change the state of your
+election to 'Voting'.  Members can now use their unique anonymous
+election key to submit their ballot, using the secure SSL protocol
+implemented by their browser.
+
+<p>Once the elections are over, you change the state of your election
+to 'Closed'.  You can then download the complete list of anonymized
+ballots.  So can anyone else, in order to verify that no
+irregularities occurred.  In particular, each member can verify that
+their vote was correctly recorded.
+
+<p>Because Ballot-Box is open source, you don't need to sign up to run
+an election.  Ballot-Box uses your existing Google Account (also know
+as Gmail Account).  (Voters don't need an account at all.  You need a
+Google Account only to <i>run</i> an election.)
+
+<p>Here's what you can do{% if user %}:
+{% else %}
+(these links will ask you to log in first):
+{% endif %}
 
 <ul>
-  <li><a href="/elections">List</a> your elections
-  <li><a href="/create">Create</a> a new election
-  <li><a href="{{logout}}">Log out</a>
+  <li><a href="/create">Create your own election<a>
+  <li><a href="/elections">List your existing elections</a>
 </ul>
+
+{% if user %}
+<p>You are logged in as <b>{{user}}</b> -- <a href="{{logout}}">log out</a>
+{% else %}
+<p>You are not logged in -- <a href="{{login}}">log in</a>
+{% endif %}

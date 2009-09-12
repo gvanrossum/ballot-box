@@ -63,7 +63,7 @@ def require_election_owner(func):
   def require_election_owner_wrapper(self):
     id = self.request.get("id")
     if not id:
-      self.redirect('/')
+      self.redirect('/elections')
       return
     try:
       id = int(id)
@@ -89,7 +89,7 @@ def require_closed_election(func):
   def require_closed_election_wrapper(self):
     id = self.request.get("id")
     if not id:
-      self.redirect('/')
+      self.redirect('/elections')
       return
     try:
       id = int(id)
@@ -121,7 +121,10 @@ def render(name, **kwds):
 class RootHandler(webapp.RequestHandler):
 
   def get(self):
-    self.redirect('/elections')
+    self.response.out.write(render('index',
+                                   login=users.create_login_url('/'),
+                                   logout=users.create_logout_url('/'),
+                                   user=users.get_current_user()))
 
 
 class ElectionsHandler(webapp.RequestHandler):
@@ -170,7 +173,9 @@ class DeleteTaskHandler(webapp.RequestHandler):
   """Background deletion of voter records for a deleted election."""
 
   def post(self):
-    if not users.is_current_user_admin() and not is_dev():
+    if not ('X-AppEngine-TaskName' in self.request.headers or
+            users.is_current_user_admin() or
+            is_dev()):
       if users.get_current_user() is None:
         self.response.set_status(401)
       else:
