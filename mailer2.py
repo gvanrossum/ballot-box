@@ -4,9 +4,12 @@ r"""Script to mail a Google Docs form URL with unique anonymizing key.
 
 INSTRUCTIONS:
 
-1. Create a Google Docs Form for your election.  The first question
-   should be a text field with "Unique key" (or something like that)
-   as the question title.  The rest of the questions are up to you.
+1. Create a Google Docs Form for your election: In the Google Docs
+   home page at https://docs.google.com/, pop open the New menu and
+   select Form.  This requires that you use a Google Account.  The
+   first question should be a text field with "Unique key" (or
+   something like that) as the question title.  The rest of the
+   questions are up to you.
 
 2. Create a text file with the email addresses of your voters, one per
    line.
