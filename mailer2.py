@@ -95,8 +95,8 @@ def main():
   smtp.connect(options.host, options.port)
   keys = []
   try:
-    for email in options:
-      key.append(sendmail(email, hmaster, smtp, options))
+    for email in todo:
+      keys.append(sendmail(email, hmaster, smtp, options))
   finally:
     print 'Sent', len(keys), 'emails.  Here are the keys:'
     keys.sort()
@@ -112,7 +112,7 @@ def sendmail(email, hmaster, smtp, options):
   values = dict(email=email, key=key,
                 form=options.form, sender=options.sender, title=options.title)
   message = TEMPLATE % values
-  smtp.sendmail(sender, [email], message)
+  smtp.sendmail(options.sender, [email], message)
   return key
 
 

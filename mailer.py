@@ -115,7 +115,7 @@ def sendmail(email, url, smtp, options):
   values = dict(email=email, url=url,
                 sender=options.sender, title=options.title)
   message = TEMPLATE % values
-  smtp.sendmail(sender, [email], message)
+  smtp.sendmail(options.sender, [email], message)
 
 
 if __name__ == '__main__':
