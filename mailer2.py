@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 
+r"""Script to mail a Google Docs form URL with unique anonymizing key.
+
+Sample invocation:
+
+python mailer2.py emails --sender guido@google.com \
+       --host smtp --title 'My Election' \
+       --form 'https://spreadsheets.google.com/viewform?formkey=dG94dEh0MDg2N240Ml9GY1lPV3BITXc6MQ&entry_1='
+"""
+
 import getpass
 import hmac
 import optparse
 import smtplib
 import sys
 
-parser = optparse.OptionParser()
+parser = optparse.OptionParser(usage=__doc__)
 parser.add_option('--form', help='Google Docs Form URL')
 parser.add_option('--host', default='localhost', help='SMTP host')
 parser.add_option('--port', default=25, help='SMTP port')
@@ -42,6 +51,9 @@ The Election Officials.
 
 
 def main():
+  if not sys.argv[1:]:
+    parser.print_help()
+    sys.exit(0)
   options, args = parser.parse_args(sys.argv[1:])
   if not options.form:
     parser.error('You must specify the --form option')
