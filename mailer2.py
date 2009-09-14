@@ -9,7 +9,9 @@ INSTRUCTIONS:
    select Form.  This requires that you use a Google Account.  The
    first question should be a text field with "Unique key" (or
    something like that) as the question title.  The rest of the
-   questions are up to you.
+   questions are up to you.  NOTE: Do *not* use the "Email this form"
+   feature.  Instead, use this script to mail voters a personalized
+   (but untrackable) form URL.
 
 2. Create a text file with the email addresses of your voters, one per
    line.
