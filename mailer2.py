@@ -2,11 +2,46 @@
 
 r"""Script to mail a Google Docs form URL with unique anonymizing key.
 
+INSTRUCTIONS:
+
+1. Create a Google Docs Form for your election.  The first question
+   should be a text field with "Unique key" (or something like that)
+   as the question title.  The rest of the questions are up to you.
+
+2. Create a text file with the email addresses of your voters, one per
+   line.
+
+3. Invoke this script with that text file as a positional argument and
+   various other required flags (see --help output).  The --form flag
+   should be the public URL of your form, with the string '&entry_0='
+   appended to the end.  The script will then append each voter's
+   unique key to the form url in the mail it sends to that voter.  The
+   script asks some questions and then starts emailing voters.  You
+   must have configured a working SMTP service.  The script will print
+   the list of voter keys at the end, but there is no way to correlate
+   the keys to the email addresses without the election-specific
+   secret that you entered into the script.
+
+4. After the election is over, remove duplicates from the spreadsheet
+   corresponding to the form, remove the timestamp column, and publish
+   the spreadsheet, so each voter can verify that their vote is
+   properly counted. You can probably use spreadsheet magic to remove
+   duplicate votes, but I haven't tried coding this up yet so you're
+   on your own.
+
+5. You should also check that all votes have a valid voter key (from
+   the list printed by the script at the end); this is needed to
+   prevent ballot-stuffing using invalid voter keys.  (Of course
+   ballot-stuffing is only possible if not all voters vote, otherwise
+   the count of ballots would exceed the count of voters, and that
+   would be suspicious.)  Doing this step is also left as an exercise
+   for the reader.
+
 Sample invocation:
 
-python mailer2.py emails --sender guido@google.com \
-       --host smtp --title 'My Election' \
-       --form 'https://spreadsheets.google.com/viewform?formkey=dG94dEh0MDg2N240Ml9GY1lPV3BITXc6MQ&entry_1='
+python mailer2.py emails --sender guido@python.org --host smtp \
+       --title 'My Election' \
+       --form 'https://spreadsheets.google.com/viewform?formkey=dDZFVEM5NmtxSk83djczUlA4dzhSdkE6MA&entry_0='
 """
 
 import getpass
